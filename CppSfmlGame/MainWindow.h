@@ -11,41 +11,42 @@
 
 namespace gst {
 
-    class MainWindow {
-    public:
-        MainWindow(unsigned width, unsigned height, const std::string& title);
+	class MainWindow {
+	public:
+		MainWindow(unsigned width, unsigned height, const std::string& title);
 
-        void render();
+		void render();
 
-    private:
-        unsigned         _width;
-        unsigned         _height;
-        std::string      _title;
-        sf::RenderWindow _window;
+	private:
+		unsigned         _width;
+		unsigned         _height;
+		std::string      _title;
+		sf::RenderWindow _window;
 
-        std::vector<WorldBloc> _world;
-        Player                 _player;
+		std::vector<WorldBloc> _world;
+		Player                 _player;
 
-        void dispatchEvents();
+		void dispatchEvents();
 
-        void displayFrame();
+		void displayFrame();
 
-        void close();
+		void close();
 
-        void loadMap();
+		void loadMap();
 
-        void detectCollisions();
+		void applyGravity();
 
-        void applyGravity();
+		void detectCollisions();
 
-        void detectCollisionLeftRight(WorldBloc& bloc);
+		void correctCollisionTop(WorldBloc& bloc);
+		void correctCollisionBottom(WorldBloc& bloc);
+		void correctCollisionLeft(WorldBloc& bloc);
+		void correctCollisionRight(WorldBloc& bloc);
 
-        void detectCollisionTopBottom(WorldBloc& bloc);
+		void keyPressed(sf::Event e);
 
-        void keyPressed(sf::Event e);
-
-        void keyReleased(sf::Event e);
-    };
+		void keyReleased(sf::Event e);
+	};
 
 }
 

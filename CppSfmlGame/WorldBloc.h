@@ -8,6 +8,8 @@
 namespace gst {
     class WorldBloc {
     public:
+        WorldBloc();
+
         WorldBloc(sf::Vector2f& pos, sf::Color& color, float size);
 
         sf::Vector2f getPos();

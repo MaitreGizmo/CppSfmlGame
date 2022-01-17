@@ -4,6 +4,8 @@ using namespace sf;
 using namespace std;
 using namespace gst;
 
+WorldBloc::WorldBloc() = default;
+
 WorldBloc::WorldBloc(sf::Vector2f& pos, sf::Color& color, float size) {
 	_position = pos;
 
