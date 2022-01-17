@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-namespace cpp_sfml {
+namespace gst {
     class Player {
     public:
         Player();

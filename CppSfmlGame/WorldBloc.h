@@ -5,7 +5,7 @@
 
 #include "Settings.h"
 
-namespace cpp_sfml {
+namespace gst {
     class WorldBloc {
     public:
         WorldBloc(sf::Vector2f& pos, sf::Color& color, float size);
@@ -16,12 +16,12 @@ namespace cpp_sfml {
 
         sf::VertexArray& getVertexRef();
 
-        static cpp_sfml::WorldBlocType getType(sf::Color color);
+        static gst::WorldBlocType getType(sf::Color color);
 
     private:
         sf::Vector2f            _position;
         sf::VertexArray         _vertex;
-        cpp_sfml::WorldBlocType _type;
+        gst::WorldBlocType _type;
 
         sf::Color getRenderColor();
 

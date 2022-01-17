@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
-namespace cpp_sfml {
+namespace gst {
 
 	static const bool        SHOW_DEBUG = true;
 	static const unsigned    WINDOW_WIDTH = 1600;

@@ -9,7 +9,7 @@
 #include "WorldBloc.h"
 #include "Player.h"
 
-namespace cpp_sfml {
+namespace gst {
 
     class MainWindow {
     public:

@@ -2,7 +2,7 @@
 #include "Settings.h"
 
 using namespace std;
-using namespace cpp_sfml;
+using namespace gst;
 using namespace sf;
 
 Player::Player() = default;

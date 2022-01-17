@@ -6,7 +6,7 @@
 #include "Settings.h"
 
 using namespace std;
-using namespace cpp_sfml;
+using namespace gst;
 
 int main() {
 	MainWindow mainWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);

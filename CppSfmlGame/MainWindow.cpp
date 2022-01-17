@@ -6,7 +6,7 @@
 
 using namespace std;
 using namespace std::chrono;
-using namespace cpp_sfml;
+using namespace gst;
 using namespace sf;
 
 MainWindow::MainWindow(unsigned width, unsigned height, const string& title) {
