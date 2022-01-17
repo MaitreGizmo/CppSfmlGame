@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <cmath>
 
 #include "MainWindow.h"
 #include "Settings.h"
@@ -93,8 +94,9 @@ void MainWindow::loadMap() {
 
 			if (WorldBloc::getType(color) != WorldBlocType::BACKGROUND) {
 				Vector2f pos(posX, y * WORLD_BLOC_SIZE);
+				Vector2i gridPos(x, y);
 
-				WorldBloc bloc(pos, color, WORLD_BLOC_SIZE);
+				WorldBloc bloc(pos, color, WORLD_BLOC_SIZE, gridPos);
 
 				_world.push_back(bloc);
 			}
@@ -112,8 +114,23 @@ void MainWindow::detectCollisions() {
 
 	vector<vector<WorldBloc>> intersections(4, vector<WorldBloc>(0));
 
+	int intersectionsCount = 0;
+
+	bool topLeft = false;
+	bool topRight = false;
+	bool bottomLeft = false;
+	bool bottomRight = false;
+
+	WorldBloc blocTopLeft;
+	WorldBloc blocTopRight;
+	WorldBloc blocBottomLeft;
+	WorldBloc blocBottomRight;
+
 	for (WorldBloc& bloc : _world) {
 		if (_player.getVertexRef().getBounds().intersects(bloc.getVertexRef().getBounds())) {
+
+			intersectionsCount++;
+
 			float px = _player.getPos().x;
 			float py = _player.getPos().y;
 
@@ -123,75 +140,144 @@ void MainWindow::detectCollisions() {
 			FloatRect playerHitBox = _player.getVertexRef().getBounds();
 			FloatRect blocHitBox = bloc.getVertexRef().getBounds();
 
-			bool top = false;
-			bool bottom = false;
-			bool left = false;
-			bool right = false;
-
 			if (blocHitBox.contains(Vector2f(px, py))) {
-				top = true;
-				intersections[TOP].push_back(bloc);
-			}
-
-			if (blocHitBox.contains(Vector2f(px, py + PLAYER_SIZE))) {
-				bottom = true;
-				intersections[BOTTOM].push_back(bloc);
-			}
-
-			if (blocHitBox.contains(Vector2f(px + PLAYER_SIZE, py + PLAYER_SIZE))) {
-				left = true;
-				intersections[LEFT].push_back(bloc);
+				topLeft = true;
+				blocTopLeft = bloc;
+				cout << "> blocTopLeft found" << endl;
 			}
 
 			if (blocHitBox.contains(Vector2f(px + PLAYER_SIZE, py))) {
-				right = true;
-				intersections[RIGHT].push_back(bloc);
+				topRight = true;
+				blocTopRight = bloc;
+				cout << "> blocTopRight found" << endl;
 			}
 
-			cout << "> collision - top : " << top << " / bottom : " << bottom << " / left : " << left << " / right : " << right << endl;
+			if (blocHitBox.contains(Vector2f(px, py + PLAYER_SIZE))) {
+				bottomLeft = true;
+				blocBottomLeft = bloc;
+				cout << "> blocBottomLeft found" << endl;
+			}
+
+			if (blocHitBox.contains(Vector2f(px + PLAYER_SIZE, py + PLAYER_SIZE))) {
+				bottomRight = true;
+				blocBottomRight = bloc;
+				cout << "> blocBottomRight found" << endl;
+			}
 		}
 	}
 
-	for (size_t I = 0; I < intersections.size(); ++I) {
+	if (intersectionsCount > 0) {
+		cout << "> intersections count : " << intersectionsCount << endl;
 
-		for (WorldBloc& bloc : intersections[I]) {
-			switch (I) {
-			case TOP:
-				correctCollisionTop(bloc);
-				break;
-			case BOTTOM:
-				correctCollisionBottom(bloc);
-				break;
-			case LEFT:
-				correctCollisionLeft(bloc);
-				break;
-			case RIGHT:
-				correctCollisionRight(bloc);
-				break;
+		float mx = _player.getMove().x;
+		float my = _player.getMove().y;
+
+		// player go left
+		if (mx < 0.0f && (topLeft || bottomLeft)) {
+
+			// player go top
+			if (my < 0.0f) {
+				// => top / left
+				correctCollisionTop(blocTopLeft);
+				correctCollisionLeft(blocTopLeft);
+
+				return;
 			}
+
+			// player go bottom
+			if (my > 0.0f) {
+				// => bottom / left
+				correctCollisionBottom(blocBottomLeft);
+				correctCollisionLeft(blocBottomLeft);
+
+				return;
+			}
+
+			// player don't move on Y axis
+			if (my == 0.0f) {
+				// => left
+				correctCollisionLeft(blocTopLeft);
+				correctCollisionLeft(blocBottomLeft);
+
+				return;
+			}
+
 		}
 
+		// player go right
+		if (mx > 0.0f && (topRight || bottomRight)) {
+
+			// player go top
+			if (my < 0.0f) {
+				// => top / right
+				correctCollisionTop(blocTopRight);
+				correctCollisionRight(blocTopRight);
+
+				return;
+			}
+
+			// player go bottom
+			if (my > 0.0f) {
+				// => bottom / right
+				correctCollisionBottom(blocBottomRight);
+				correctCollisionRight(blocBottomRight);
+
+				return;
+			}
+
+			// player don't move on Y axis
+			if (my == 0.0f) {
+				// => right
+				correctCollisionRight(blocBottomRight);
+				correctCollisionRight(blocTopRight);
+
+				return;
+			}
+
+		}
+
+		// player don't move on X axis
+		if (mx == 0.0f) {
+
+			// player go top
+			if (my < 0.0f) {
+				// => top
+				correctCollisionTop(blocTopLeft);
+				correctCollisionTop(blocTopRight);
+
+				return;
+			}
+
+			// player go bottom
+			if (my > 0.0f) {
+				// => bottom
+				correctCollisionBottom(blocBottomLeft);
+				correctCollisionBottom(blocBottomRight);
+
+				return;
+			}
+
+			// player don't move on Y axis
+			if (my == 0.0f) {
+				// => static
+				correctCollisionLeft(blocTopLeft);
+				correctCollisionLeft(blocBottomLeft);
+
+				correctCollisionRight(blocTopRight);
+				correctCollisionRight(blocBottomRight);
+
+				correctCollisionTop(blocTopLeft);
+				correctCollisionTop(blocTopRight);
+
+				correctCollisionBottom(blocBottomLeft);
+				correctCollisionBottom(blocBottomRight);
+
+				return;
+			}
+
+		}
 	}
 
-	//// detect intersections between player and world blocs
-	//for (WorldBloc& bloc : intersections) {
-	//	if (playerHitbox.intersects(bloc.getVertexRef().getBounds())) {
-	//		if (_player.getMove().x > _player.getMove().y && _player.getMove().x != 0) {
-	//			cout << "> detect collision left/right ..." << endl;
-	//			detectCollisionLeftRight(bloc);
-	//		}
-	//		else if (_player.getMove().y > _player.getMove().x && _player.getMove().y != 0) {
-	//			cout << "> detect collision top/bottom ..." << endl;
-	//			detectCollisionTopBottom(bloc);
-	//		}
-	//		else {
-	//			cout << "> detect collision left/right/top/bottom ..." << endl;
-	//			detectCollisionTopBottom(bloc);
-	//			detectCollisionLeftRight(bloc);
-	//		}
-
-	//	}
-	//}
 }
 
 void MainWindow::keyPressed(Event e) {
@@ -266,66 +352,46 @@ void MainWindow::applyGravity() {
 }
 
 void MainWindow::correctCollisionTop(WorldBloc& bloc) {
-	float py = _player.getPos().y;
-	float by = bloc.getPos().y;
+	if (_player.getVertexRef().getBounds().intersects(bloc.getVertexRef().getBounds())) {
+		float py = _player.getPos().y;
+		float by = bloc.getPos().y;
 
-	if (_player.moveTop) {
-		if (py < by + WORLD_BLOC_SIZE) {
-			float delta = (by + WORLD_BLOC_SIZE) - py;
-			_player.setPosY(py + delta);
-			_player.stopMoveY();
-			_player.moveTop = false;
-
-			cout << "> collision : top" << endl;
-		}
+		float delta = (by + WORLD_BLOC_SIZE) - py;
+		_player.setPosY(py + delta);
+		_player.stopMoveY();
+		_player.moveTop = false;
 	}
 }
 
 void MainWindow::correctCollisionBottom(WorldBloc& bloc) {
-	float py = _player.getPos().y;
-	float by = bloc.getPos().y;
+	if (_player.getVertexRef().getBounds().intersects(bloc.getVertexRef().getBounds())) {
+		float py = _player.getPos().y;
+		float by = bloc.getPos().y;
 
-	if (_player.moveBottom) {
-		if (py + PLAYER_SIZE > by) {
-			float delta = py + PLAYER_SIZE - by;
-			_player.setPosY(py - delta);
-			_player.stopMoveY();
-			_player.moveBottom = false;
-			_player.moveTop = false;
-
-			cout << "> collision : bottom" << endl;
-		}
-		else {
-			_player.moveBottom = true;
-			_player.moveTop = false;
-		}
+		float delta = py + PLAYER_SIZE - by;
+		_player.setPosY(py - delta);
+		_player.stopMoveY();
+		_player.moveBottom = false;
+		_player.moveTop = false;
 	}
 }
 
 void MainWindow::correctCollisionLeft(WorldBloc& bloc) {
-	float px = _player.getPos().x;
-	float bx = bloc.getPos().x;
+	if (_player.getVertexRef().getBounds().intersects(bloc.getVertexRef().getBounds())) {
+		float px = _player.getPos().x;
+		float bx = bloc.getPos().x;
 
-	if (_player.moveLeft) {
-		if (px < bx + WORLD_BLOC_SIZE) {
-			float delta = px - (bx + WORLD_BLOC_SIZE);
-			_player.setPosX(px + delta);
-
-			cout << "> collision : left" << endl;
-		}
+		float delta = (bx + WORLD_BLOC_SIZE) - px;
+		_player.setPosX(px + delta);
 	}
 }
 
 void MainWindow::correctCollisionRight(WorldBloc& bloc) {
-	float px = _player.getPos().x;
-	float bx = bloc.getPos().x;
+	if (_player.getVertexRef().getBounds().intersects(bloc.getVertexRef().getBounds())) {
+		float px = _player.getPos().x;
+		float bx = bloc.getPos().x;
 
-	if (_player.moveRight) {
-		if (px + PLAYER_SIZE > bx) {
-			float delta = (px + PLAYER_SIZE) - bx;
-			_player.setPosX(px - delta);
-
-			cout << "> collision : right" << endl;
-		}
+		float delta = (px + PLAYER_SIZE) - bx;
+		_player.setPosX(px - delta);
 	}
 }

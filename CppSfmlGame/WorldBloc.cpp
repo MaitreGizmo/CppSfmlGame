@@ -6,8 +6,9 @@ using namespace gst;
 
 WorldBloc::WorldBloc() = default;
 
-WorldBloc::WorldBloc(sf::Vector2f& pos, sf::Color& color, float size) {
+WorldBloc::WorldBloc(Vector2f & pos, Color & color, float size, Vector2i & gridPos) {
 	_position = pos;
+	_gridPos = gridPos;
 
 	_type = getType(color);
 

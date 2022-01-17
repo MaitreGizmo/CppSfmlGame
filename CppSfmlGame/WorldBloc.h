@@ -6,28 +6,31 @@
 #include "Settings.h"
 
 namespace gst {
-    class WorldBloc {
-    public:
-        WorldBloc();
+	class WorldBloc {
+	public:
+		WorldBloc();
 
-        WorldBloc(sf::Vector2f& pos, sf::Color& color, float size);
+		WorldBloc(sf::Vector2f& pos, sf::Color& color, float size, sf::Vector2i& gridPos);
 
-        sf::Vector2f getPos();
+		sf::Vector2f getPos();
 
-        sf::VertexArray getVertex();
+		sf::Vector2i& getGridPos();
 
-        sf::VertexArray& getVertexRef();
+		sf::VertexArray getVertex();
 
-        static gst::WorldBlocType getType(sf::Color color);
+		sf::VertexArray& getVertexRef();
 
-    private:
-        sf::Vector2f            _position;
-        sf::VertexArray         _vertex;
-        gst::WorldBlocType _type;
+		static gst::WorldBlocType getType(sf::Color color);
 
-        sf::Color getRenderColor();
+	private:
+		sf::Vector2f _position;
+		sf::Vector2i _gridPos;
+		sf::VertexArray _vertex;
+		gst::WorldBlocType _type;
 
-    };
+		sf::Color getRenderColor();
+
+	};
 }
 
 

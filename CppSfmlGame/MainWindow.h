@@ -18,13 +18,13 @@ namespace gst {
 		void render();
 
 	private:
-		unsigned         _width;
-		unsigned         _height;
-		std::string      _title;
+		unsigned _width;
+		unsigned _height;
+		std::string _title;
 		sf::RenderWindow _window;
 
 		std::vector<WorldBloc> _world;
-		Player                 _player;
+		Player _player;
 
 		void dispatchEvents();
 
